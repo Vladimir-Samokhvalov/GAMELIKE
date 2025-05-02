@@ -1,19 +1,27 @@
 import { itemData } from '../items/itemData.js';
 
-const backpackIcon = document.getElementById('backpack-icon');
-const backpackModal = document.getElementById('backpack-modal');
+let backpackIcon = null;
+let backpackModal = null;
 
-if (backpackIcon && backpackModal) {
-    backpackIcon.addEventListener('click', () => {
-        backpackModal.classList.toggle('hidden');
-    });
+function initBackpack() {
+    backpackIcon = document.getElementById('backpack-icon');
+    backpackModal = document.getElementById('backpack-modal');
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            backpackModal.classList.add('hidden');
-        }
-    });
+    if (backpackIcon && backpackModal) {
+        backpackIcon.addEventListener('click', () => {
+            backpackModal.classList.toggle('hidden');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                backpackModal.classList.add('hidden');
+            }
+        });
+    }
 }
+
+// Инициализируем рюкзак после загрузки DOM
+document.addEventListener('DOMContentLoaded', initBackpack);
 
 function addItemToBackpack(type) {
     const slots = document.querySelectorAll('.backpack-slot');
@@ -55,6 +63,9 @@ export function setupChests() {
     const modal = document.getElementById('item-select-modal');
     const options = document.querySelectorAll('.item-option');
     let currentChest = null;
+
+    if (!modal || !options.length) return;
+
     chests.forEach(chest => {
         chest.addEventListener('click', () => {
             if (chest.classList.contains('opened')) return;
@@ -62,6 +73,7 @@ export function setupChests() {
             currentChest = chest;
         });
     });
+
     options.forEach(option => {
         option.addEventListener('click', () => {
             if (!currentChest) return;
@@ -69,11 +81,10 @@ export function setupChests() {
             addItemToBackpack(type);
             modal.classList.add('hidden');
             currentChest.classList.add('opened');
-            currentChest.style.display = 'none';
             currentChest = null;
         });
     });
-    // Закрытие по клику вне окна
+
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.add('hidden');
@@ -83,6 +94,8 @@ export function setupChests() {
 
 function setupBackpackTooltips() {
     const tooltip = document.getElementById('backpack-tooltip');
+    if (!tooltip) return;
+
     document.addEventListener('mouseover', function(e) {
         const item = e.target.closest('.backpack-item');
         if (item) {
@@ -96,12 +109,14 @@ function setupBackpackTooltips() {
             }
         }
     });
+
     document.addEventListener('mousemove', function(e) {
         if (!tooltip.classList.contains('hidden')) {
             tooltip.style.left = (e.clientX + 18) + 'px';
             tooltip.style.top = (e.clientY + 18) + 'px';
         }
     });
+
     document.addEventListener('mouseout', function(e) {
         if (e.target.closest('.backpack-item')) {
             tooltip.classList.add('hidden');
@@ -146,15 +161,27 @@ function usePotionIfNeeded(player) {
 }
 
 function updateHealthbars(player, enemy) {
-    // Обновляем полоски и текст
-    document.querySelectorAll('.player-healthbar').forEach(bar => {
-        bar.querySelector('.health-text').textContent = `${player.health} / ${player.maxHealth}`;
-        bar.querySelector('.health-bar-inner').style.width = `${(player.health/player.maxHealth)*100}%`;
+    const playerBars = document.querySelectorAll('.player-healthbar');
+    if (!playerBars.length) return;
+
+    playerBars.forEach(bar => {
+        const healthText = bar.querySelector('.health-text');
+        const healthBar = bar.querySelector('.health-bar-inner');
+        if (healthText && healthBar) {
+            healthText.textContent = `${player.health} / ${player.maxHealth}`;
+            healthBar.style.width = `${(player.health/player.maxHealth)*100}%`;
+        }
     });
+
     if (enemy) {
-        document.querySelectorAll('.enemy-healthbar').forEach(bar => {
-            bar.querySelector('.health-text').textContent = `${enemy.health} / ${enemy.maxHealth}`;
-            bar.querySelector('.health-bar-inner').style.width = `${(enemy.health/enemy.maxHealth)*100}%`;
+        const enemyBars = document.querySelectorAll('.enemy-healthbar');
+        enemyBars.forEach(bar => {
+            const healthText = bar.querySelector('.health-text');
+            const healthBar = bar.querySelector('.health-bar-inner');
+            if (healthText && healthBar) {
+                healthText.textContent = `${enemy.health} / ${enemy.maxHealth}`;
+                healthBar.style.width = `${(enemy.health/enemy.maxHealth)*100}%`;
+            }
         });
     }
 }
@@ -174,8 +201,12 @@ function clearBattleLog() {
 }
 
 function showBattleButtonIfEnemy() {
-    const btn = document.querySelector('.location.active .battle-start-btn');
-    const enemyBar = document.querySelector('.location.active .enemy-healthbar');
+    const activeLocation = document.querySelector('.location.active');
+    if (!activeLocation) return;
+
+    const btn = activeLocation.querySelector('.battle-start-btn');
+    const enemyBar = activeLocation.querySelector('.enemy-healthbar');
+    
     if (btn && enemyBar) {
         btn.classList.remove('hidden');
         btn.onclick = () => {

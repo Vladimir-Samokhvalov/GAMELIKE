@@ -84,4 +84,25 @@
 }
 #backpack-tooltip.hidden {
     display: none;
+}
+
+.chest {
+    position: absolute;
+    left: 50%;
+    bottom: 120px;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background: url('/images/box.png') no-repeat center center / contain;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.chest.opened {
+    background: url('/images/box_open.png') no-repeat center center / contain;
 } 
