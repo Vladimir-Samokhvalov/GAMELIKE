@@ -1,6 +1,7 @@
 import { startBattle } from './battle.js';
 import { resetGame } from './start/gameReset.js';
 import { playMainMusic, playBattleMusic, stopAllMusic } from './music/music.js';
+import { setupChests } from './backpack/backpack.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const locations = document.querySelectorAll('.location');
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 // Автоматически запускаем бой, если есть враг
                 setTimeout(() => {
+                    setupChests();
                     const enemyBar = document.querySelector('.location.active .enemy-healthbar');
                     if (enemyBar) {
                         playBattleMusic();

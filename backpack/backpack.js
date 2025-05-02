@@ -1,4 +1,4 @@
-import { itemData } from './items/itemData.js';
+import { itemData } from '../items/itemData.js';
 
 const backpackIcon = document.getElementById('backpack-icon');
 const backpackModal = document.getElementById('backpack-modal');
@@ -50,7 +50,7 @@ function addItemToBackpack(type) {
     }
 }
 
-function setupChests() {
+export function setupChests() {
     const chests = document.querySelectorAll('.chest');
     const modal = document.getElementById('item-select-modal');
     const options = document.querySelectorAll('.item-option');
@@ -317,4 +317,7 @@ window.resetGame = function resetGame() {
         chest.classList.remove('opened');
         chest.style.display = '';
     });
-}; 
+};
+
+// Гарантируем, что сундуки работают после загрузки модуля
+setupChests(); 
