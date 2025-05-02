@@ -1,5 +1,12 @@
 import { itemData } from './items/itemData.js';
 import { playMainMusic, stopAllMusic } from './music/music.js';
+import { locationsData } from './locations/locationsData.js';
+import { monstersData } from './monsters/monstersData.js';
+
+// Глобальный объект игрока
+if (!window.player) {
+    window.player = { health: 10, maxHealth: 10 };
+}
 
 export function getPlayerDamage() {
     const slots = document.querySelectorAll('.backpack-slot');
@@ -67,12 +74,32 @@ export function startBattle() {
     const enemyBar = document.querySelector('.location.active .enemy-healthbar');
     if (!enemyBar) return;
     clearBattleLog();
-    const player = { health: 10, maxHealth: 10 };
-    const enemy = { health: 7, maxHealth: 7, damage: 2 };
+    // Используем глобального игрока
+    const player = window.player;
+    // Определяем текущую локацию и монстра
+    const activeLocation = document.querySelector('.location.active');
+    const locId = parseInt(activeLocation?.id?.replace('location-', ''));
+    const locData = locationsData.find(l => l.id === locId);
+    let monster = null;
+    if (locData && locData.hasEnemy && locData.monster) {
+        monster = monstersData.find(m => m.id === locData.monster);
+    }
+    // Если монстр не найден, используем дефолтные параметры
+    const enemy = monster ? {
+        name: monster.name,
+        health: monster.health,
+        maxHealth: monster.maxHealth,
+        damage: monster.damage
+    } : {
+        name: 'Враг',
+        health: 7,
+        maxHealth: 7,
+        damage: 2
+    };
     updateHealthbars(player, enemy);
     let turn = 0;
     let battleOver = false;
-    logBattle('Бой начался!');
+    logBattle(`Бой начался! ${monster ? 'Противник: ' + monster.name : ''}`);
     const interval = setInterval(() => {
         if (battleOver) return;
         if (turn % 2 === 0) {
@@ -95,7 +122,7 @@ export function startBattle() {
             let dmg = enemy.damage;
             if (hasShield()) dmg = Math.max(0, dmg - itemData.shield.block);
             player.health = Math.max(0, player.health - dmg);
-            logBattle(`Враг атакует на ${dmg} урона!`);
+            logBattle(`${enemy.name || 'Враг'} атакует на ${dmg} урона!`);
             updateHealthbars(player, enemy);
             usePotionIfNeeded(player);
             if (player.health <= 0) {
@@ -116,4 +143,9 @@ export function startBattle() {
         }
         turn++;
     }, 1000);
-} 
+}
+
+// Сброс здоровья при рестарте игры
+window.resetGame = function resetGame() {
+    window.player = { health: 10, maxHealth: 10 };
+}; 

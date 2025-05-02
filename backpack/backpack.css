@@ -5,22 +5,18 @@
     display: block;
 }
 
-#backpack-icon {
+#backpack-bar {
     position: fixed;
-    top: 24px;
-    left: 24px;
-    width: 48px;
-    height: 48px;
-    background: transparent;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    cursor: pointer;
-    z-index: 1000;
-    border: 2px solid #b36b00;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 72px;
+    background: rgba(24,24,24,0.92);
+    border-bottom: 2px solid #b36b00;
+    z-index: 3000;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
 }
 
 #backpack-modal {
@@ -45,24 +41,29 @@
 }
 
 #backpack-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 0;
-    width: 380px;
-    height: 220px;
-    padding: 0;
-    background: #111;
-    border: 1px solid #444;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    width: auto;
+    height: 56px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-right: 18px;
 }
 
 .backpack-slot {
-    background: transparent;
-    border: 1px solid #888;
-    border-radius: 0;
-    width: 100%;
-    height: 100%;
+    background: #181818;
+    border: 1.5px solid #888;
+    border-radius: 7px;
+    width: 48px;
+    height: 48px;
     box-sizing: border-box;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #backpack-tooltip {
@@ -105,4 +106,14 @@
 }
 .chest.opened {
     background: url('/images/box_open.png') no-repeat center center / contain;
+}
+
+.item-img {
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
 } 

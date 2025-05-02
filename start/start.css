@@ -3,7 +3,7 @@
     top: 0; left: 0; right: 0; bottom: 0;
     width: 100vw;
     height: 100vh;
-    background: #888;
+    background: url('../images/location4.png') no-repeat center center/cover, #888;
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -34,4 +34,21 @@
 #start-game-btn:hover {
     background: #ffd700;
     color: #b36b00;
+}
+.start-title {
+    font-size: 3rem;
+    font-family: 'Georgia', serif;
+    color: #ffe066;
+    text-shadow: 2px 2px 8px #222, 0 0 24px #b36b00;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+    text-align: center;
+}
+.start-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 } 

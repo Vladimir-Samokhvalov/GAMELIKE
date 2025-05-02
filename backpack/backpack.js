@@ -1,108 +1,170 @@
 import { itemData } from '../items/itemData.js';
 
-let backpackIcon = null;
-let backpackModal = null;
-
-function initBackpack() {
-    backpackIcon = document.getElementById('backpack-icon');
-    backpackModal = document.getElementById('backpack-modal');
-
-    if (backpackIcon && backpackModal) {
-        backpackIcon.addEventListener('click', () => {
-            backpackModal.classList.toggle('hidden');
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                backpackModal.classList.add('hidden');
-            }
-        });
-    }
+// Глобальный объект игрока
+if (!window.player) {
+    window.player = { health: 10, maxHealth: 10 };
 }
 
-// Инициализируем рюкзак после загрузки DOM
-document.addEventListener('DOMContentLoaded', initBackpack);
-
 function addItemToBackpack(type) {
+    console.log('Adding item to backpack:', type);
     const slots = document.querySelectorAll('.backpack-slot');
     for (let slot of slots) {
         if (!slot.hasChildNodes()) {
             const item = document.createElement('div');
             item.classList.add('backpack-item', type);
-            // Визуализация предмета
+            // Используем изображение
+            const img = document.createElement('img');
+            img.draggable = false;
             if (type === 'sword') {
-                item.style.width = '18px';
-                item.style.height = '40px';
-                item.style.background = 'linear-gradient(180deg, #eee 70%, #888 100%)';
-                item.style.border = '3px solid #b36b00';
-                item.style.borderRadius = '6px';
-                item.style.margin = 'auto';
+                img.src = 'images/sword.png';
+                img.alt = 'Меч';
+                img.style.width = '32px';
+                img.style.height = '32px';
             } else if (type === 'shield') {
-                item.style.width = '32px';
-                item.style.height = '32px';
-                item.style.background = '#b3b3b3';
-                item.style.border = '3px solid #b36b00';
-                item.style.borderRadius = '6px';
-                item.style.margin = 'auto';
+                img.src = 'images/shield.png';
+                img.alt = 'Щит';
+                img.style.width = '32px';
+                img.style.height = '32px';
             } else if (type === 'potion') {
-                item.style.width = '32px';
-                item.style.height = '32px';
-                item.style.background = '#e74c3c';
-                item.style.border = '3px solid #b36b00';
-                item.style.borderRadius = '50%';
-                item.style.margin = 'auto';
+                img.src = 'images/bottle.png';
+                img.alt = 'Зелье';
+                img.style.width = '32px';
+                img.style.height = '32px';
             }
+            img.classList.add('item-img');
+            item.appendChild(img);
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'center';
             slot.appendChild(item);
+            console.log('Item added to slot');
             break;
         }
     }
 }
 
+let currentChest = null;
+
 export function setupChests() {
+    console.log('Setting up chests...');
     const chests = document.querySelectorAll('.chest');
     const modal = document.getElementById('item-select-modal');
     const options = document.querySelectorAll('.item-option');
-    let currentChest = null;
 
-    if (!modal || !options.length) return;
+    if (!modal || !options.length) {
+        console.log('Modal or options not found, will retry...');
+        setTimeout(setupChests, 100);
+        return;
+    }
+
+    // Обновим иконки в модальном окне выбора предмета
+    options.forEach(option => {
+        const type = option.getAttribute('data-item');
+        let imgSrc = '';
+        if (type === 'sword') imgSrc = 'images/sword.png';
+        if (type === 'shield') imgSrc = 'images/shield.png';
+        if (type === 'potion') imgSrc = 'images/bottle.png';
+        let icon = option.querySelector('img');
+        if (!icon) {
+            icon = document.createElement('img');
+            option.prepend(icon);
+        }
+        icon.src = imgSrc;
+        icon.alt = type;
+        icon.className = 'item-img';
+        icon.style.width = '40px';
+        icon.style.height = '40px';
+        icon.style.marginBottom = '4px';
+        // Скрываем старую div-иконку
+        const oldIcon = option.querySelector('.item-icon');
+        if (oldIcon) oldIcon.style.display = 'none';
+    });
+
+    // Удаляем старые обработчики
+    chests.forEach(chest => {
+        chest.removeEventListener('click', handleChestClick);
+    });
+    options.forEach(option => {
+        option.removeEventListener('click', handleOptionClick);
+    });
+    modal.removeEventListener('click', handleModalClick);
 
     chests.forEach(chest => {
-        chest.addEventListener('click', () => {
+        chest.addEventListener('click', function() {
             if (chest.classList.contains('opened')) return;
             modal.classList.remove('hidden');
             currentChest = chest;
         });
     });
-
     options.forEach(option => {
-        option.addEventListener('click', () => {
+        option.addEventListener('click', function() {
             if (!currentChest) return;
-            const type = option.getAttribute('data-item');
+            const type = this.getAttribute('data-item');
             addItemToBackpack(type);
             modal.classList.add('hidden');
             currentChest.classList.add('opened');
             currentChest = null;
         });
     });
+    modal.addEventListener('click', handleModalClick);
+    console.log('Chests setup completed');
+}
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.add('hidden');
-        }
-    });
+function handleChestClick() {
+    console.log('Chest clicked');
+    if (this.classList.contains('opened')) {
+        console.log('Chest already opened');
+        return;
+    }
+    const modal = document.getElementById('item-select-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        console.log('Current chest set:', this);
+    }
+}
+
+function handleOptionClick() {
+    console.log('Option clicked');
+    const type = this.getAttribute('data-item');
+    console.log('Selected item type:', type);
+    addItemToBackpack(type);
+    const modal = document.getElementById('item-select-modal');
+    if (modal) modal.classList.add('hidden');
+    this.classList.add('opened');
+    console.log('Chest marked as opened');
+}
+
+function handleModalClick(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+    }
 }
 
 function setupBackpackTooltips() {
     const tooltip = document.getElementById('backpack-tooltip');
     if (!tooltip) return;
 
+    // Для рюкзака
     document.addEventListener('mouseover', function(e) {
-        const item = e.target.closest('.backpack-item');
+        let item = e.target.closest('.backpack-item');
+        if (!item && e.target.classList.contains('item-img')) {
+            item = e.target.parentElement;
+        }
         if (item) {
             let type = 'unknown';
             if (item.classList.contains('sword')) type = 'sword';
             if (item.classList.contains('shield')) type = 'shield';
             if (item.classList.contains('potion')) type = 'potion';
+            if (itemData[type]) {
+                tooltip.textContent = itemData[type].description;
+                tooltip.classList.remove('hidden');
+            }
+        }
+
+        // Для предметов в сундуке
+        let option = e.target.closest('.item-option');
+        if (option) {
+            let type = option.getAttribute('data-item');
             if (itemData[type]) {
                 tooltip.textContent = itemData[type].description;
                 tooltip.classList.remove('hidden');
@@ -118,7 +180,17 @@ function setupBackpackTooltips() {
     });
 
     document.addEventListener('mouseout', function(e) {
-        if (e.target.closest('.backpack-item')) {
+        const related = e.relatedTarget;
+        const leftItem = e.target.closest('.backpack-item');
+        const toItem = related && related.closest ? related.closest('.backpack-item') : null;
+        // Для рюкзака
+        if (leftItem && leftItem !== toItem) {
+            tooltip.classList.add('hidden');
+        }
+        // Для сундука
+        const leftOption = e.target.closest('.item-option');
+        const toOption = related && related.closest ? related.closest('.item-option') : null;
+        if (leftOption && leftOption !== toOption) {
             tooltip.classList.add('hidden');
         }
     });
@@ -163,7 +235,6 @@ function usePotionIfNeeded(player) {
 function updateHealthbars(player, enemy) {
     const playerBars = document.querySelectorAll('.player-healthbar');
     if (!playerBars.length) return;
-
     playerBars.forEach(bar => {
         const healthText = bar.querySelector('.health-text');
         const healthBar = bar.querySelector('.health-bar-inner');
@@ -172,7 +243,6 @@ function updateHealthbars(player, enemy) {
             healthBar.style.width = `${(player.health/player.maxHealth)*100}%`;
         }
     });
-
     if (enemy) {
         const enemyBars = document.querySelectorAll('.enemy-healthbar');
         enemyBars.forEach(bar => {
@@ -231,7 +301,8 @@ function startBattle() {
     const enemyBar = document.querySelector('.location.active .enemy-healthbar');
     if (!enemyBar) return;
     clearBattleLog();
-    const player = { health: 10, maxHealth: 10 };
+    // Используем глобального игрока
+    const player = window.player;
     const enemy = { health: 7, maxHealth: 7, damage: 2 };
     updateHealthbars(player, enemy);
     let turn = 0;
@@ -315,6 +386,7 @@ if (document.readyState === 'loading') {
     setupBackpackTooltips();
 }
 
+// Сброс здоровья при рестарте игры
 window.resetGame = function resetGame() {
     // 1. Сбросить активную локацию на первую
     document.querySelectorAll('.location').forEach((loc, i) => {
@@ -348,6 +420,7 @@ window.resetGame = function resetGame() {
         chest.classList.remove('opened');
         chest.style.display = '';
     });
+    window.player = { health: 10, maxHealth: 10 };
 };
 
 // Гарантируем, что сундуки работают после загрузки модуля
